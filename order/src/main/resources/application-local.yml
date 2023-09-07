@@ -1,0 +1,6 @@
+spring:
+  docker:
+    compose:
+      profiles:
+        active: "local"
+
