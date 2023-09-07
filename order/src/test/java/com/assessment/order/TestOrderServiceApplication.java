@@ -1,4 +1,4 @@
-package com.calix.order;
+package com.assessment.order;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.TestConfiguration;
