@@ -1,0 +1,17 @@
+version: '3'
+services:
+  order_db:
+    profiles:
+      - "local"
+    platform: linux/x86_64
+    container_name: order_database
+    image: mysql:8.0.23
+    environment:
+      MYSQL_DATABASE: order
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "${HOST_PORT:-3312}:3306"
+    volumes:
+      - ./order/src/main/resources/db/init-schema.sql:/docker-entrypoint-initdb.d/init_db.sql
