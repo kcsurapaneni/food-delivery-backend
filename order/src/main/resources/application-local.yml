@@ -3,4 +3,8 @@ spring:
     compose:
       profiles:
         active: "local"
+  datasource:
+    username: user
+    password: password # we can use key vault or system variables to store the sensitive information
+    url: jdbc:mysql://localhost:3312/order
 
