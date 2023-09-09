@@ -95,6 +95,12 @@
             <version>3.19.0</version> <!-- Use the latest version available -->
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>5.3.1</version>
+            <scope>test</scope>
+        </dependency>
 
 
         <dependency>
