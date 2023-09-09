@@ -17,7 +17,7 @@ services:
       - ./order/src/main/resources/db/init-schema.sql:/docker-entrypoint-initdb.d/init_db.sql
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: confluentinc/cp-zookeeper:7.5.0
     container_name: food_delivery_zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -26,7 +26,7 @@ services:
       - "22181:2181"
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.5.0
     container_name: food_delivery_kafka
     depends_on:
       - zookeeper
