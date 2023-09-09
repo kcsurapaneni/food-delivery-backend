@@ -1,0 +1,31 @@
+spring:
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 5
+      properties:
+        "[request.timeout.ms]": 100
+        "[max.block.ms]": 1000
+    order:
+      details:
+        topic:
+          name: order-details
+  jpa:
+    open-in-view: false
+
+  datasource:
+    url: jdbc:tc:mysql:8.0.23:///order?TC_INITSCRIPT=db/init-schema.sql
+
+  test:
+    database:
+      replace: none
+
+#    consumer:
+#      key-deserializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      properties:
+#        spring:
+#          json:
+#            trusted:
+#              packages: "com.assessment.order.dto.OrderDetails"
