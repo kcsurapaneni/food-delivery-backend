@@ -12,7 +12,6 @@ import org.springframework.stereotype.*;
 
 import java.math.*;
 import java.util.*;
-import java.util.stream.*;
 
 /**
  * @author Krishna Chaitanya
@@ -45,16 +44,22 @@ public class OrderService {
                             .deliveryAddress(orderRequest.deliveryAddress())
                             .build()
             );
-            var orderItemList = orderRequest.items().stream().map(i -> OrderItem.from(i, order.getId())).collect(Collectors.toList());
+            var orderItemList = orderRequest.items().stream().map(i -> OrderItem.from(i, order.getId())).toList();
             orderItemRepository.saveAll(orderItemList);
             order.setBillingAmount(calculateBill(orderRequest.items()));
             order.setOrderStatus(OrderStatus.PROCESSING);
             orderRepository.save(order);
             orderCreationEvent(order, orderRequest);
             return Order.from(order);
+        } catch (CustomerNotFoundException e) {
+            log.error("Customer is not found when creating the order", e);
+            throw e;
+        } catch (ItemNotFoundException e) {
+            log.error("Item is not found when creating the order", e);
+            throw e;
         } catch (Exception e) {
-            log.error("issue with creating the order ", e);
-            throw new OrderCreationException("issue with creating the order. message : " + e.getMessage());
+            log.error("Issue with creating the order", e);
+            throw new OrderCreationException("Issue with creating the order. message : " + e.getMessage());
         }
     }
 
