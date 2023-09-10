@@ -12,10 +12,14 @@ import org.springframework.stereotype.*;
  */
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class OrderDetailsKafkaProducer {
 
     private final KafkaTemplate<String, OrderDetails> orderDetailsKafkaTemplate;
+
+    public OrderDetailsKafkaProducer(KafkaTemplate<String, OrderDetails> orderDetailsKafkaTemplate) {
+        this.orderDetailsKafkaTemplate = orderDetailsKafkaTemplate;
+        this.orderDetailsKafkaTemplate.setObservationEnabled(true);
+    }
 
     @Value("${spring.kafka.order.details.topic.name:order-details}")
     private String topic;
