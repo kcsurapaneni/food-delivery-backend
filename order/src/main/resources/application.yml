@@ -50,7 +50,6 @@ management:
       exposure:
         include: health,info,prometheus,metrics
   tracing:
-    kafka
     sampling:
       probability: 1
   zipkin:
