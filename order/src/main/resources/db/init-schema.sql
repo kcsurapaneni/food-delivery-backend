@@ -49,31 +49,19 @@ CREATE TABLE orders (
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
 );
 
+
 -- order_items table
 
 CREATE TABLE order_items (
     order_item_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    order_id INT UNSIGNED,
-    item_id INT UNSIGNED,
+    order_id INT UNSIGNED NOT NULL,
+    item_id INT UNSIGNED NOT NULL,
     quantity INT NOT NULL,
     notes TEXT,
     FOREIGN KEY (order_id) REFERENCES orders(order_id),
     FOREIGN KEY (item_id) REFERENCES items(item_id)
 );
 
--- billing table
-
-CREATE TABLE billing (
-    billing_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    order_id INT UNSIGNED,
-    total_amount DECIMAL(10, 2) NOT NULL,
-    tax DECIMAL(6, 2) NOT NULL,
-    discount DECIMAL(6, 2),
-    delivery_charge DECIMAL(6, 2),
-    payment_method VARCHAR(50) NOT NULL,
-    payment_status VARCHAR(20) NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id)
-);
 
 -- Sample records into the `restaurants` table
 
@@ -84,7 +72,9 @@ VALUES
     (2, 'Tasty Bites', '123 Main St, Cityville', '+1-123-456-7890', 'Italian'),
     (3, 'Sushi Express', '789 Oak St, Villagetown', '+1-555-123-4567', 'Japanese');
 
+
 -- Sample records into the `items` table
+
 INSERT INTO items
     (restaurant_id, name, description, price, category)
 VALUES
@@ -94,7 +84,9 @@ VALUES
     (2, 'Penne Alfredo', 'Creamy Alfredo sauce with penne pasta', 9.99, 'Pasta'),
     (3, 'Sushi Platter', 'Assorted sushi rolls and sashimi', 18.99, 'Sushi');
 
+
 -- Sample records into the `customers` table
+
 INSERT INTO customers
     (name, email, phone)
 VALUES
