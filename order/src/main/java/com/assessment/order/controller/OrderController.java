@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+import static org.springframework.http.HttpStatus.*;
+
 /**
  * @author Krishna Chaitanya
  */
@@ -27,8 +29,15 @@ public class OrderController {
             throw new OrderCreationException("Empty order is created");
         }
         return ResponseEntity
-                .status(HttpStatus.CREATED)
+                .status(CREATED)
                 .body(optionalOrderResponse.get());
+    }
+
+    @GetMapping("/status/{id}")
+    ResponseEntity<OrderStatusResponse> requestOrder(@PathVariable("id") Integer orderId) {
+        return ResponseEntity
+                .status(OK)
+                .body(orderService.fetchOrderStatus(orderId));
     }
 
 }
