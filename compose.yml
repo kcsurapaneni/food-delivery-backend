@@ -12,9 +12,25 @@ services:
       MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: root_password
     ports:
-      - "${HOST_PORT:-3312}:3306"
+      - "${ORDER_DB_PORT:-3312}:3306"
     volumes:
       - ./order/src/main/resources/db/init-schema.sql:/docker-entrypoint-initdb.d/init_db.sql
+
+  restaurant_db:
+    #    profiles:
+    #      - "local"
+    platform: linux/x86_64
+    container_name: restaurant_database
+    image: mysql:8.0.23
+    environment:
+      MYSQL_DATABASE: restaurant
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "${RESTAURANT_DB_PORT:-3313}:3306"
+    volumes:
+      - ./restaurant/src/main/resources/db/init-schema.sql:/docker-entrypoint-initdb.d/init_db.sql
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -39,5 +55,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CREATE_TOPICS: "order-details:1:1"
+      KAFKA_CREATE_TOPICS: >
+        order-details:1:1
+        restaurant-status:1:1
 # to read = kafka-console-consumer --bootstrap-server localhost:29092 --topic order-details --from-beginning
