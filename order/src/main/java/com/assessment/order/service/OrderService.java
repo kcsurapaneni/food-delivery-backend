@@ -6,9 +6,12 @@ import com.assessment.order.exception.item.*;
 import com.assessment.order.exception.order.*;
 import com.assessment.order.model.*;
 import com.assessment.order.repository.*;
+import com.assessment.order.util.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.*;
+import org.springframework.web.client.*;
 
 import java.math.*;
 import java.util.*;
@@ -21,7 +24,12 @@ import java.util.*;
 @RequiredArgsConstructor
 public class OrderService {
 
+    @Value("${invoice.base.uri}")
+    private String invoiceBaseUri;
+
     private final EventService eventService;
+
+    private final RestTemplate restTemplate;
 
     private final OrderRepository orderRepository;
     private final ItemsRepository itemsRepository;
@@ -50,6 +58,8 @@ public class OrderService {
             order.setOrderStatus(OrderStatus.PROCESSING);
             orderRepository.save(order);
             orderCreationEvent(order, orderRequest);
+            var invoiceResponseResponseEntity = restTemplate.postForEntity(invoiceBaseUri, OrderUtil.convertOrderRequestToOrderDetails(order, orderRequest), InvoiceResponse.class);
+            log.info("invoice api status code : {}, response : {}", invoiceResponseResponseEntity.getStatusCode(), invoiceResponseResponseEntity.getBody());
             return Order.from(order);
         } catch (CustomerNotFoundException e) {
             log.error("Customer is not found when creating the order", e);
@@ -77,19 +87,20 @@ public class OrderService {
 
     private void orderCreationEvent(Order order, OrderRequest orderRequest) {
         try {
-            var orderDetails = new OrderDetails(
-                    order.getId(),
-                    order.getCustomer().getId(),
-                    orderRequest.restaurantId(),
-                    order.getDeliveryAddress(),
-                    order.getBillingAmount(),
-                    orderRequest.items()
-            );
+            var orderDetails = OrderUtil.convertOrderRequestToOrderDetails(order, orderRequest);
             eventService.sendOrderEvent(orderDetails);
         } catch (Exception e) {
             // we can log the failed events in a database and retry in a scheduled manner, if we don't want the API to be failed
             log.error("order event is failed", e);
         }
+    }
+
+    public OrderStatusResponse fetchOrderStatus(final Integer orderId) {
+        var optionalOrder = orderRepository.findById(orderId);
+        if (optionalOrder.isEmpty()) {
+            throw new OrderNotFoundException(orderId);
+        }
+        return new OrderStatusResponse(optionalOrder.get().getId(), optionalOrder.get().getOrderStatus());
     }
 
 }
