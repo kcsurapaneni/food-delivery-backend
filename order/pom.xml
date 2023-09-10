@@ -110,6 +110,43 @@
         </dependency>
         -->
 
+        <!-- For Metrics -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- OpenTelemetry version -->
+        <!-- For Tracing -->
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        <!-- For Latency Visualization -->
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-zipkin</artifactId>
+        </dependency>
+
+        <!--
+        This dependency provides us special logback appender, which sends the data to the console but also
+        to the local Loki instance running. Please check `logback-spring.xml`
+         -->
+        <dependency>
+            <groupId>com.github.loki4j</groupId>
+            <artifactId>loki-logback-appender</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+
+        <!-- DB Tracing -->
+        <dependency>
+            <groupId>net.ttddyy.observation</groupId>
+            <artifactId>datasource-micrometer-spring-boot</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
