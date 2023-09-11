@@ -9,9 +9,7 @@ import com.assessment.order.repository.*;
 import com.assessment.order.util.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.*;
-import org.springframework.web.client.*;
 
 import java.math.*;
 import java.util.*;
@@ -24,42 +22,37 @@ import java.util.*;
 @RequiredArgsConstructor
 public class OrderService {
 
-    @Value("${invoice.base.uri}")
-    private String invoiceBaseUri;
-
     private final EventService eventService;
-
-    private final RestTemplate restTemplate;
+    private final InvoiceService invoiceService;
+    private final OrderCalculationService orderCalculationService;
+    private final OrderVerificationService orderVerificationService;
 
     private final OrderRepository orderRepository;
-    private final ItemsRepository itemsRepository;
-    private final CustomerRepository customerRepository;
     private final OrderItemRepository orderItemRepository;
 
+
     public Optional<OrderResponse> requestOrder(OrderRequest orderRequest) {
+
         try {
-            int customerId = orderRequest.customerId();
-            log.debug("customer id : {}", customerId);
-            var customerOptional = customerRepository.findById(customerId);
-            if (customerOptional.isEmpty()) {
-                throw new CustomerNotFoundException(customerId);
-            }
-            Order order = orderRepository.save(
-                    Order
-                            .builder()
-                            .customer(customerOptional.get())
-                            .orderStatus(OrderStatus.PENDING)
-                            .deliveryAddress(orderRequest.deliveryAddress())
-                            .build()
-            );
-            var orderItemList = orderRequest.items().stream().map(i -> OrderItem.from(i, order.getId())).toList();
-            orderItemRepository.saveAll(orderItemList);
-            order.setBillingAmount(calculateBill(orderRequest.items()));
+            // verify customer and order items information
+            orderVerificationService.verifyOrder(orderRequest);
+
+            // create order
+            Order order = createOrder(orderRequest);
+
+            // create order items and calculate the total amount
+            BigDecimal calculatedBill = createOrderItemsAndCalculateTotal(orderRequest, order);
+
+            order.setBillingAmount(calculatedBill);
             order.setOrderStatus(OrderStatus.PROCESSING);
             orderRepository.save(order);
-            orderCreationEvent(order, orderRequest);
-            var invoiceResponseResponseEntity = restTemplate.postForEntity(invoiceBaseUri, OrderUtil.convertOrderRequestToOrderDetails(order, orderRequest), InvoiceResponse.class);
-            log.info("invoice api status code : {}, response : {}", invoiceResponseResponseEntity.getStatusCode(), invoiceResponseResponseEntity.getBody());
+
+            // send order details to invoice service through an API call
+            invoiceService.sendInvoice(OrderUtil.convertOrderRequestToOrderDetails(order, orderRequest));
+
+            // publish order details event
+            publishOrderCreationEvent(order, orderRequest);
+
             return Order.from(order);
         } catch (CustomerNotFoundException e) {
             log.error("Customer is not found when creating the order", e);
@@ -73,19 +66,25 @@ public class OrderService {
         }
     }
 
-    private BigDecimal calculateBill(List<Items> items) {
-        BigDecimal bill = BigDecimal.ZERO;
-        for (Items item : items) {
-            Optional<Item> itemOptional = itemsRepository.findPriceById(item.itemId());
-            if (itemOptional.isEmpty()) {
-                throw new ItemNotFoundException(item.itemId());
-            }
-            bill = bill.add(itemOptional.get().getPrice().multiply(BigDecimal.valueOf(item.quantity())));
-        }
-        return bill;
+    private Order createOrder(OrderRequest orderRequest) {
+        return orderRepository.save(
+                Order
+                        .builder()
+                        .customerId(orderRequest.customerId())
+                        .orderStatus(OrderStatus.PENDING)
+                        .deliveryAddress(orderRequest.deliveryAddress())
+                        .build()
+        );
     }
 
-    private void orderCreationEvent(Order order, OrderRequest orderRequest) {
+    private BigDecimal createOrderItemsAndCalculateTotal(OrderRequest orderRequest, Order order) {
+        var orderItemList = orderRequest.items().stream().map(i -> OrderItem.from(i, order.getId())).toList();
+        orderItemRepository.saveAll(orderItemList);
+        return orderCalculationService.calculateBill(orderRequest.items());
+    }
+
+
+    private void publishOrderCreationEvent(Order order, OrderRequest orderRequest) {
         try {
             var orderDetails = OrderUtil.convertOrderRequestToOrderDetails(order, orderRequest);
             eventService.sendOrderEvent(orderDetails);

@@ -15,7 +15,7 @@ public final class OrderUtil {
     public static OrderDetails convertOrderRequestToOrderDetails(Order order, OrderRequest orderRequest) {
         return new OrderDetails(
                 order.getId(),
-                order.getCustomer().getId(),
+                order.getCustomerId(),
                 orderRequest.restaurantId(),
                 order.getDeliveryAddress(),
                 order.getBillingAmount(),

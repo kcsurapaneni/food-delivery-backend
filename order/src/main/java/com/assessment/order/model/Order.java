@@ -25,9 +25,12 @@ public class Order {
     @Column(name = "order_id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "customer_id")
+//    private Customer customer;
+
+    @Column(name = "customer_id", nullable = false)
+    private Integer customerId;
 
     @Column(name = "delivery_address", nullable = false)
     private String deliveryAddress;
