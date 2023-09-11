@@ -4,7 +4,7 @@
 
 The backend of the food delivery application can be divided into several microservices to achieve scalability and maintainability.
 
-![FDB design](./images/fdb.jpg)
+![FDB design](./images/fdb.png)
 
 
 ## Components
