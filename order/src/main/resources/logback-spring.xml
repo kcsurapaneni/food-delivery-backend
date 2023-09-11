@@ -19,7 +19,10 @@
         </format>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="LOKI"/>
-    </root>
+    <springProfile name="docker">
+        <root level="INFO">
+            <appender-ref ref="LOKI"/>
+        </root>
+    </springProfile>
+
 </configuration>
