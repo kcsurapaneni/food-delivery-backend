@@ -4,11 +4,13 @@
 
 The backend of the food delivery application can be divided into several microservices to achieve scalability and maintainability.
 
+![FDB design](./images/fdb.jpg)
 
-### Components
+
+## Components
 
 
-#### API Gateway
+### API Gateway
    
 **Responsibility**: 
    
@@ -26,7 +28,7 @@ Acts as a single entry point for client requests and routes them to the appropri
 Spring Cloud Gateway or a similar API Gateway solution.
 
 
-#### User Service
+### User Service
 
 **Responsibility:**
 
@@ -42,7 +44,7 @@ Manages user accounts and authentication.
 Spring Boot with Spring Security.
 
 
-#### Restaurant Service
+### Restaurant Service
 
 **Responsibility:** 
 
@@ -61,7 +63,7 @@ Manages restaurant-related data like menu items and other operations.
 Spring Boot with Spring Data JPA for data storage and Spring Web for APIs.
 
 
-#### Order Service
+### Order Service
 
 **Responsibility:** 
    
@@ -79,7 +81,7 @@ Handles the order management process.
 Spring Boot, Kafka for event-driven communication.
 
 
-#### Payment Service
+### Payment Service
 
 **Responsibility:** 
    
@@ -94,7 +96,7 @@ Manages billing and checkout processes.
 Spring Boot with payment gateway integration (e.g., Stripe or PayPal).
 
 
-#### Notification Service
+### Notification Service
 
    **Responsibility:** 
    
