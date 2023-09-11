@@ -9,7 +9,7 @@ spring:
     property-naming-strategy: SNAKE_CASE
 
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -43,23 +43,10 @@ server:
   servlet:
     context-path: /api
 
-# tracings are sampled 10% of time, but can be configured
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus,metrics
-  tracing:
-    sampling:
-      probability: 1
-  zipkin:
-    tracing:
-      endpoint: http://${TEMPO_HOST:tempo}:${TEMPO_PORT:9411}/api/v2/spans
+invoice:
+  base:
+    uri: http://${RESTAURANT_HOST:localhost}:8081/api/invoice
 
 logging:
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
-
-invoice:
-  base:
-    uri: http://${RESTAURANT_HOST:localhost}:8081/api/invoice
