@@ -4,8 +4,10 @@ import com.assessment.order.dto.*;
 import com.assessment.order.exception.customer.*;
 import com.assessment.order.repository.*;
 import org.junit.jupiter.api.*;
+import org.mockito.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
+import org.springframework.boot.test.mock.mockito.*;
 import org.springframework.boot.testcontainers.service.connection.*;
 import org.springframework.test.context.*;
 import org.testcontainers.containers.*;
@@ -43,6 +45,9 @@ class OrderServiceTest {
     @Autowired
     private OrderItemRepository orderItemRepository;
 
+    @MockBean
+    private InvoiceService invoiceService;
+
     @BeforeAll
     static void beforeAll() {
         kafka.start();
@@ -58,6 +63,8 @@ class OrderServiceTest {
     @Test
     void testRequestOrder() {
         // Given
+        BDDMockito.given(invoiceService.sendInvoice(ArgumentMatchers.any())).willReturn(true);
+
         var orderRequest = new OrderRequest(1, 2, "14 Avenue, SW, Calgary",
                 List.of(
                         new Items(3, 3, "NOTE-1"),

@@ -1,11 +1,14 @@
 package com.assessment.order.controller;
 
 import com.assessment.order.repository.*;
+import com.assessment.order.service.*;
 import io.restassured.*;
 import io.restassured.http.*;
 import org.junit.jupiter.api.*;
+import org.mockito.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.*;
+import org.springframework.boot.test.mock.mockito.*;
 import org.springframework.boot.test.web.server.*;
 import org.springframework.boot.testcontainers.service.connection.*;
 import org.springframework.test.context.*;
@@ -24,6 +27,9 @@ class OrderControllerTest {
 
     @LocalServerPort
     private Integer port;
+
+    @MockBean
+    private InvoiceService invoiceService;
 
     @Container
     @ServiceConnection
@@ -54,6 +60,9 @@ class OrderControllerTest {
 
     @Test
     void testRequestOrder() {
+
+        // Given
+        BDDMockito.given(invoiceService.sendInvoice(ArgumentMatchers.any())).willReturn(true);
 
         given()
                 .contentType(ContentType.JSON)
