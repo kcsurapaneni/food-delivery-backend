@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: restaurant service
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 5
+      properties:
+        "[request.timeout.ms]": 100
+        "[max.block.ms]": 100 # https://stackoverflow.com/questions/49487619/how-to-set-timeout-for-onfailure-event-spring-kafka
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.assessment.*
+        spring.json.type.mapping: "com.assessment.order.dto.OrderDetails:com.assessment.restaurant.dto.OrderDetails" # https://stackoverflow.com/questions/70278794/spring-boot-kafka-package-name-in-the-message-header
+    order:
+      details:
+        topic:
+          name: order-details
+    restaurant:
+      status:
+        topic:
+          name: restaurant-status
+# ideally we should have add a kafka health check, but it seems quite challenging. So, for now using the timeout option
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:restaurant}
+    username: ${DB_USER:user}
+    password: ${DB_PASSWORD:password} # we can use key vault or system variables to store the sensitive information
+
+server:
+  port: 8081
+  servlet:
+    context-path: /api
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

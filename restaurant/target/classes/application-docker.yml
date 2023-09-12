@@ -1,0 +1,16 @@
+spring:
+  kafka:
+    bootstrap-servers: kafka:9092
+
+# tracings are sampled 10% of time, but can be configured
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  tracing:
+    sampling:
+      probability: 1
+  zipkin:
+    tracing:
+      endpoint: http://${TEMPO_HOST:tempo}:${TEMPO_PORT:9411}/api/v2/spans
