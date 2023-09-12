@@ -1,0 +1,27 @@
+
+POST  http://localhost:8080/api/order
+Content-Type: application/json
+
+{
+  "restaurant_id" : {{$random.integer(1, 4)}},
+  "customer_id": {{$random.integer(1, 4)}},
+  "delivery_address": "{{$random.alphabetic(15)}}",
+  "items" : [
+    {
+      "item_id": {{$random.integer(1, 3)}},
+      "quantity": {{$random.integer(1, 11)}},
+      "notes": "{{$random.alphanumeric(15)}}"
+    },
+    {
+      "item_id": {{$random.integer(3, 6)}},
+      "quantity": {{$random.integer(1, 11)}},
+      "notes": "{{$random.alphanumeric(15)}}"
+    }
+  ]
+}
+
+###
+
+GET http://localhost:8080/api/order/status/1
+
+
