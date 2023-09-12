@@ -1,5 +1,88 @@
 # food-delivery-backend
 
+
+## How to run
+
+### Pre-requisites
+
+- Ensure that Docker is installed on your system.
+
+### Run
+
+1. Clone this project repository and navigate to it using your terminal or command prompt.
+
+2. Move to the [docker](./docker) folder within the project directory.
+
+3. Run the following command to start the Docker containers:
+   ```
+   docker compose up -d
+   ```
+4. Once the containers are up and running, you can access the different components of the application through the following URLs:
+
+    1. You can perform the health check for the [order-api](./order) by visiting: http://localhost:8080/api/actuator/health.
+
+    2. To perform the health check for the [restaurant-api](./restaurant), navigate to: http://localhost:8081/api/actuator/health.
+
+    3. For database connection details please refer to the [docker compose](./docker/compose.yaml) file.
+
+    4. Grafana, the monitoring tool, can be accessed at: http://localhost:3000
+   
+    5. To communicate with the `order-api`, you have the flexibility to utilize various REST clients, such as Postman. For this example, I've employed the JetBrains HTTP Client plugin. Simply navigate to the [http](./http) folder and access the [requests](./http/requests.http) file. Within this file, you'll find two distinct APIs available:
+
+       1. **POST:** This endpoint is designed for the creation of new orders.
+
+            _Sample Request_
+            ```
+            {
+              "restaurant_id" : 1,
+              "customer_id": 2,
+              "delivery_address": "14 Avenue, SW, Calgary",
+              "items" : [
+                {
+                  "item_id": 2,
+                  "quantity": 5,
+                  "notes": "NOTE-1"
+                },
+                {
+                  "item_id": 3,
+                  "quantity": 6,
+                  "notes": "NOTE-2"
+                }
+              ]
+            }
+            ```
+   
+            _Sample Response_
+   
+            ```
+            {
+              "order_id": 1,
+              "order_status": "PROCESSING",
+              "billing_amount": 137.89,
+              "timestamp": "2023-09-12T01:49:54.538437803Z"
+            }
+            ```
+       
+       2. **GET:** Use this endpoint to inquire about the current status of an order.
+
+          _Sample Request_
+            ```
+            http://localhost:8080/api/order/status/1
+            ```
+
+          _Sample Response_
+
+          ```
+          {
+             "order_id": 1,
+             "order_status": "APPROVED"
+          }
+          ```
+5. Here is the screenshot for POST API call, we can see what are the operations like db, api and kafka producer and consumer calls b/w 2 of these apis
+
+![POST-1](./images/post-order-11.png)
+![POST-2](./images/post-order-22.png)
+
 ## Design Diagram
 
 The backend of the food delivery application can be divided into several microservices to achieve scalability and maintainability.
@@ -37,7 +120,6 @@ Manages user accounts and authentication.
 **Functionality:**
 
 - Handles user registration, login, and user profile management.
-- Provides authentication and authorization for API access.
 
 **Technology:**
 
@@ -78,7 +160,7 @@ Handles the order management process.
 
 **Technology:** 
 
-Spring Boot, Kafka for event-driven communication.
+Spring Boot, Web, Data JPA, Kafka for event-driven communication.
 
 
 ### Payment Service
@@ -107,7 +189,7 @@ Handles communication between the application and users/restaurants.
    - Sends notifications (e.g., email, SMS, push notifications) to users about order updates, promotions, etc.
    - Facilitates communication between users and restaurants (e.g., order confirmations, issue resolution).
    
-**Technology:** Spring Boot with email/SMS/push notification integrations.
+**Technology:** Kafka for event-driven communication and email/SMS/push notification integrations using AWS SNS.
 
 
 ## Choice of Technologies
@@ -116,7 +198,7 @@ Handles communication between the application and users/restaurants.
 
 **Spring Boot:** Simplifies building production-ready applications, with built-in features like Spring Web, Data JPA, Actuator, and more.
 
-**MySQL 8:** A popular and reliable relational database for storing restaurant, menu, user, and order data.
+**MySQL 8:** A popular and reliable relational database for storing data.
 
 **Kafka:** Used for asynchronous event-driven communication between microservices. For example, when an order is placed, it can trigger events to update order status and notify the user.
 
@@ -138,8 +220,8 @@ Handles communication between the application and users/restaurants.
 
 ## Considerations
 
-- Implement a queuing mechanism (e.g., Kafka or RabbitMQ) to handle asynchronous tasks like order status updates and notifications.
-- Implement rate limiting and security measures to protect against abuse.
+- Consider implementing a queuing mechanism (e.g., Kafka) to handle asynchronous tasks like order payment integration, user details update and other notifications.
+- We could also implement rate limiting and security measures to protect against abuse.
 
 ## Limitations
    
