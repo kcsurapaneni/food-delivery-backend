@@ -55,7 +55,26 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CREATE_TOPICS: >
-        order-details:1:1
-        restaurant-status:1:1
+#      KAFKA_CREATE_TOPICS: >
+#        order-details:1:1
+#        restaurant-status:1:1
 # to read = kafka-console-consumer --bootstrap-server localhost:29092 --topic order-details --from-beginning
+
+  kafka_setup:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: food_delivery_kafka_setup
+    depends_on:
+      - kafka
+    entrypoint: ['/bin/sh', '-c']
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka:9092 --list
+      
+      echo -e 'creating kafka topics'
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic order-details --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic restaurant-status --replication-factor 1 --partitions 1
+      
+      echo -e 'available topics'
+      kafka-topics --bootstrap-server kafka:9092 --list
+      "
