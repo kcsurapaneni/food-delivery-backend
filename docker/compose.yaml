@@ -1,0 +1,153 @@
+version: "3"
+services:
+
+  order:
+    image: order-api
+    container_name: local-order-api
+    environment:
+      DB_HOST: "order_db"
+      LOKI_HOST: "loki"
+      TEMPO_HOST: "tempo"
+      RESTAURANT_HOST: "restaurant"
+    build:
+      context: ../
+      dockerfile: docker/order/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      order_db:
+        condition: service_healthy
+
+  restaurant:
+    image: restaurant-api
+    container_name: local-restaurant-api
+    environment:
+      DB_HOST: "restaurant_db"
+      LOKI_HOST: "loki"
+      TEMPO_HOST: "tempo"
+    build:
+      context: ../
+      dockerfile: docker/restaurant/Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      restaurant_db:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus
+    container_name: local-prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  tempo:
+    image: grafana/tempo
+    container_name: local-tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+
+  loki:
+    image: grafana/loki
+    container_name: local-loki
+    command: [ "-config.file=/etc/loki/local-config.yaml" ]
+    ports:
+      - "3100:3100"
+
+  grafana:
+    image: grafana/grafana
+    container_name: local-grafana
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - "3000:3000"
+
+  order_db:
+    platform: linux/x86_64
+    container_name: order_database
+    image: mysql:8.0.23
+    environment:
+      MYSQL_DATABASE: order
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "${ORDER_DB_PORT:-3312}:3306"
+    volumes:
+      - ./db/order-init-schema.sql:/docker-entrypoint-initdb.d/init_db.sql
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  restaurant_db:
+    platform: linux/x86_64
+    container_name: restaurant_database
+    image: mysql:8.0.23
+    environment:
+      MYSQL_DATABASE: restaurant
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "${RESTAURANT_DB_PORT:-3313}:3306"
+    volumes:
+      - ./db/restaurant-init-schema.sql:/docker-entrypoint-initdb.d/init_db.sql
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: food_delivery_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: food_delivery_kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#      KAFKA_CREATE_TOPICS: >
+#        order-details:1:1
+#        restaurant-status:1:1
+
+  kafka_setup:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: food_delivery_kafka_setup
+    depends_on:
+      - kafka
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka:9092 --list
+
+      echo -e 'creating kafka topics'
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic order-details --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic restaurant-status --replication-factor 1 --partitions 1
+
+      echo -e 'available topics'
+      kafka-topics --bootstrap-server kafka:9092 --list
+      "
