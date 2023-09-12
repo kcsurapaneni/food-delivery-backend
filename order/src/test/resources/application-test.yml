@@ -11,6 +11,12 @@ spring:
       details:
         topic:
           name: order-details
+    restaurant:
+      status:
+        topic:
+          name: restaurant-status
+    consumer:
+      auto-offset-reset: earliest
   jpa:
     open-in-view: false
 
@@ -20,12 +26,3 @@ spring:
   test:
     database:
       replace: none
-
-#    consumer:
-#      key-deserializer: org.apache.kafka.common.serialization.StringSerializer
-#      value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
-#      properties:
-#        spring:
-#          json:
-#            trusted:
-#              packages: "com.assessment.order.dto.OrderDetails"
