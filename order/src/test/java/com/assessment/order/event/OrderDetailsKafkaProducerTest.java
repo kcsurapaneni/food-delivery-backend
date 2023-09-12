@@ -31,7 +31,7 @@ class OrderDetailsKafkaProducerTest {
     @ServiceConnection
     static final KafkaContainer kafka = new KafkaContainer(
             DockerImageName.parse("confluentinc/cp-kafka:7.5.0")
-    ).withEnv("KAFKA_CREATE_TOPICS", "order-details");
+    );
 
     @Autowired
     private OrderDetailsKafkaProducer orderDetailsKafkaProducer;
@@ -46,8 +46,8 @@ class OrderDetailsKafkaProducerTest {
                 ImmutableMap.of(
                         ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers(),
                         ConsumerConfig.GROUP_ID_CONFIG, "order-details-consumer",
-                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
-                        "allow.auto.create.topics", "false"
+                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"
+//                        "allow.auto.create.topics", "false"
                 ),
                 new StringDeserializer(),
                 deserializer
