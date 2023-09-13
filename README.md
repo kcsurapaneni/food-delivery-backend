@@ -78,7 +78,11 @@
              "order_status": "APPROVED"
           }
           ```
-5. Here is the screenshot for POST API call, we can see what are the operations like db, api and kafka producer and consumer calls b/w 2 of these apis
+          
+5. Please find the simple workflow of this project.
+![Workflow](./images/workflow.png)
+
+6. Here is a screenshot of Order API POST call. We can see what are all the operations (_DB, API and Kafka producer and consumer_) has been called between `order-api` and `restaurant-api`.
 
 ![POST-1](./images/post-order-11.png)
 ![POST-2](./images/post-order-22.png)
