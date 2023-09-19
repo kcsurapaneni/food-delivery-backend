@@ -48,6 +48,9 @@ services:
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
       - ./tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"
+# http://localhost:3200/api/traces/8bf279ae171e0b0188d670ebfa3f0463
 
   loki:
     image: grafana/loki
