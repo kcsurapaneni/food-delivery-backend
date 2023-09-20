@@ -11,6 +11,10 @@ spring:
     password: password # we can use key vault or system variables to store the sensitive information
     url: jdbc:mysql://localhost:3312/order
 
+management:
+  tracing:
+    enabled: false
+
 invoice:
   base:
     uri: http://localhost:8081/api/invoice
