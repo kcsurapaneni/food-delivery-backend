@@ -147,6 +147,15 @@
             <version>1.0.1</version>
         </dependency>
 
+<!--        http://localhost:8080/api/v3/api-docs-->
+<!--        http://localhost:8080/api/swagger-ui/index.html-->
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
