@@ -1,6 +1,8 @@
 package com.assessment.restaurant.config;
 
 import com.assessment.restaurant.dto.*;
+import com.fasterxml.jackson.databind.*;
+import io.swagger.v3.core.jackson.*;
 import org.springframework.context.annotation.*;
 import org.springframework.kafka.config.*;
 import org.springframework.kafka.core.*;
@@ -20,6 +22,16 @@ public class AppConfiguration {
         factory.setConsumerFactory(consumerFactory);
 
         return factory;
+    }
+
+    /**
+     * This bean has been added so that in the swagger-ui, we will see snake_case attributes instead of camelCase <br/>
+     * Swagger UI Path :- /api/swagger-ui/index.html <br/>
+     * <a href="https://github.com/springdoc/springdoc-openapi/issues/66#issuecomment-560335774">Reference link</a>
+     */
+    @Bean
+    public ModelResolver modelResolver(ObjectMapper objectMapper) {
+        return new ModelResolver(objectMapper);
     }
 
 }
