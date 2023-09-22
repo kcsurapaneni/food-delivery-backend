@@ -9,3 +9,7 @@ spring:
     username: user
     password: password # we can use key vault or system variables to store the sensitive information
     url: jdbc:mysql://localhost:3313/restaurant
+
+management:
+  tracing:
+    enabled: false
