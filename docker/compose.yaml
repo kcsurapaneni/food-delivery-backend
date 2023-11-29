@@ -35,7 +35,7 @@ services:
         condition: service_healthy
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v2.48.0
     container_name: local-prometheus
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
@@ -43,7 +43,7 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
   tempo:
-    image: grafana/tempo
+    image: grafana/tempo:main-4c3b404
     container_name: local-tempo
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
@@ -53,14 +53,14 @@ services:
 # http://localhost:3200/api/traces/8bf279ae171e0b0188d670ebfa3f0463
 
   loki:
-    image: grafana/loki
+    image: grafana/loki:k178-5db9a88
     container_name: local-loki
     command: [ "-config.file=/etc/loki/local-config.yaml" ]
     ports:
       - "3100:3100"
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:10.2.2-ubuntu
     container_name: local-grafana
     volumes:
       - ./grafana/datasources:/etc/grafana/provisioning/datasources
