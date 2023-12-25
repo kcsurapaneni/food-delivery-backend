@@ -15,8 +15,13 @@ import org.springframework.web.client.*;
 @Configuration
 public class AppConfiguration {
 
+//    @Bean
+//    RestTemplate restTemplate(RestTemplateBuilder builder) {
+//        return builder.build();
+//    }
+
     @Bean
-    RestTemplate restTemplate(RestTemplateBuilder builder) {
+    RestClient restClient(RestClient.Builder builder) {
         return builder.build();
     }
 
